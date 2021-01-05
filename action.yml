@@ -1,0 +1,16 @@
+name: "Immutable Files Check"
+description: "Check for files that are changed but shouldn't be changed once commited to main, i.e. migrations"
+inputs:
+  repo-token:
+    description: "Token used to interact with the Github API."
+    required: true
+  files:
+    description: "Glob pattern of files to be linted."
+    default: "**/*"
+    required: false
+runs:
+  using: "node12"
+  main: "lib/index.js"
+branding:
+  icon: "check-circle"
+  color: "yellow"
