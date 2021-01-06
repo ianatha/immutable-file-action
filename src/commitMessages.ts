@@ -88,10 +88,10 @@ export function getSettings(): IGitActionSettings {
 export async function runCommitMessages(): Promise<void> {
   try {
     const commitSHA = github.context.sha;
-    core.debug(`Commit Message SHA:${commitSHA}`);
+    core.info(`Commit Message SHA:${commitSHA}`);
 
     const message = await getCommitMessage(commitSHA);
-    core.debug(`Commit Message Found:\n${message}`);
+    core.info(`Commit Message Found:\n${message}`);
 
     const settings = getSettings();
     const config = getConfig(settings);
