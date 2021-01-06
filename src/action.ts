@@ -27,7 +27,7 @@ async function run(): Promise<void> {
     core.info(`PR: ${prNumber}, SHA: ${getSha()}, OWNER: ${OWNER}, REPO: ${REPO}`);
 
     await runImmutableFiles({octokit, prNumber, OWNER, REPO});
-    await runCommitMessages();
+    await runCommitMessages({octokit, prNumber, OWNER, REPO});
   } catch (err) {
     core.setFailed(err.message ? err.message : "error");
   }

@@ -5,8 +5,14 @@ declare namespace NodeJS {
   }
 }
 
-interface PrResponse {
+interface PrFilesResponse {
   endCursor?: string;
   hasNextPage?: boolean;
   files: string[];
+}
+
+interface PrCommitsResponse {
+  endCursor?: string;
+  hasNextPage?: boolean;
+  commits: string[];
 }

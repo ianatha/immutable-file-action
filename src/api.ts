@@ -1,13 +1,59 @@
 import * as core from "@actions/core";
 import { Octokit } from "@octokit/rest";
 
+export async function fetchCommitSHAsFromPR(
+  client: Octokit,
+  prNumber: number,
+  owner: string,
+  repo: string,
+  startCursor?: string
+): Promise<PrCommitsResponse> {
+  const { repository } = await client.graphql(
+    `
+    query ChangedFBatch($owner: String!, $repo: String!, $prNumber: Int!, $startCursor: String) {
+      repository(owner: $owner, name: $repo) {
+        pullRequest(number: $prNumber) {
+          commits(first: 100, after: $startCursor) {
+            pageInfo {
+              hasNextPage
+              endCursor
+            }
+            totalCount
+            edges {
+              cursor
+              node {
+                path
+              }
+            }
+          }
+        }
+      }
+    }
+  `,
+    { owner, repo, prNumber, startCursor }
+  );
+
+  const pr = repository.pullRequest;
+
+
+  if (!pr || !pr.commits) {
+    core.info(`No PR or PR commits detected`);
+    return { commits: [] };
+  }
+
+  return {
+    ...pr.files.pageInfo,
+    files: pr.files.edges.map((e) => e.node.path),
+  };
+}
+
 export async function fetchFilesBatchPR(
   client: Octokit,
   prNumber: number,
   owner: string,
   repo: string,
   startCursor?: string
-): Promise<PrResponse> {
+): Promise<PrFilesResponse> {
   const { repository } = await client.graphql(
     `
     query ChangedFilesBatch($owner: String!, $repo: String!, $prNumber: Int!, $startCursor: String) {

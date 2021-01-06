@@ -2,6 +2,7 @@ import * as core from "@actions/core";
 import * as github from "@actions/github";
 import { getCommitMessage } from "./gitLog";
 import { Rule } from "./message-helper";
+import { fetchCommitSHAsFromPR } from "./api";
 
 // import { getConfig } from "./config";
 // import { getSettings } from "./settings-helper";
@@ -85,8 +86,9 @@ export function getSettings(): IGitActionSettings {
   return settings;
 };
 
-export async function runCommitMessages(): Promise<void> {
+export async function runCommitMessages({octokit, prNumber, OWNER, REPO}): Promise<void> {
   try {
+    const commitsSHAs = await fetchCommitSHAsFromPR(octokit, prNumber, OWNER, REPO)
     const commitSHA = github.context.sha;
     core.info(`Commit Message SHA:${commitSHA}`);
 
