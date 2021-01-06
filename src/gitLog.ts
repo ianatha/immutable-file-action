@@ -1,15 +1,17 @@
-const git = require("isomorphic-git");
+import git, { ReadCommitResult } from "isomorphic-git";
+
 const fs = require("fs");
 
-interface Commit {
-  oid: any;
+export async function getCommitMessage(sha: string, dir = "."): Promise<string>{
+  let commits: ReadCommitResult[] = await git.log({fs, dir, ref: sha, depth: 1});
+  return commits[0].commit.message;
 }
 
 export async function commitsForFile(filepath, dir = ".") {
-  let commits: Commit[] = await git.log({ fs, dir })
-  let lastSHA = null
-  let lastCommit: Commit|null = null
-  let commitsThatMatter: (Commit|null)[] = []
+  let commits: ReadCommitResult[] = await git.log({ fs, dir })
+  let lastSHA: string|null = null
+  let lastCommit: ReadCommitResult|null = null
+  let commitsThatMatter: (ReadCommitResult|null)[] = []
   for (let commit of commits) {
     try {
       let o = await git.readObject({ fs, dir, oid: commit.oid, filepath })

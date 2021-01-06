@@ -1,6 +1,20 @@
 name: "Immutable Files Check"
 description: "Check for files that are changed but shouldn't be changed once commited to main, i.e. migrations"
 inputs:
+  compulsory-scope:
+    description: >
+      <scope> field will be compulsory inside commit header
+      specify true or false. defaults to false
+    required: false
+    default: "true"
+
+  max-header-length:
+    description: >
+      Maximum length that the header should have
+      defaults to 50
+    required: false
+    default: "80"
+
   repo-token:
     description: "Token used to interact with the Github API."
     required: true
