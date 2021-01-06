@@ -13,7 +13,7 @@ const inputs = {
   },
 
   get files() {
-    return processArrayInput("files");
+    return processArrayInput("immutable-files");
   }
 };
 

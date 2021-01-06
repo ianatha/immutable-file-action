@@ -73,11 +73,11 @@ export function getConfig(settings: IGitActionSettings): IConfig {
 export function getSettings(): IGitActionSettings {
   const settings = getDefaultSettings();
 
-  settings.compulsoryScope = (core.getInput('compulsory-scope') || 'false').toLowerCase() === 'true';
+  settings.compulsoryScope = (core.getInput('commit-compulsory-scope') || 'false').toLowerCase() === 'true';
 
-  let _maxHeaderLength = parseInt((core.getInput('max-header-length') || '50'));
+  let _maxHeaderLength = parseInt((core.getInput('commit-max-header-length') || '50'));
   if (_maxHeaderLength == NaN || _maxHeaderLength <= 0) {
-    throw new Error('max-header-length should be valid non-zero positive integer')
+    throw new Error('commit-max-header-length should be valid non-zero positive integer')
   } else {
     settings.maxHeaderLength = _maxHeaderLength;
   }
