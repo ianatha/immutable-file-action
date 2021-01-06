@@ -22,7 +22,10 @@ export async function fetchCommitSHAsFromPR(
             edges {
               cursor
               node {
-                path
+                commit {
+                  oid
+                  message
+                }
               }
             }
           }
