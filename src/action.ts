@@ -5,6 +5,7 @@ import { Octokit } from "@octokit/rest";
 import { getChangedFiles } from "./fileUtils";
 import { getPrNumber, getSha } from "./githubUtils";
 import inputs from "./inputs";
+import { commitsForFile } from "./gitLog";
 
 const CHECK_NAME = "Immutable Files";
 const OWNER = github.context.repo.owner;
@@ -36,7 +37,7 @@ async function run(): Promise<void> {
       },
     });
     core.info(`PR: ${prNumber}, SHA: ${getSha()}, OWNER: ${OWNER}, REPO: ${REPO}`);
-    
+
     const {
       data: { id: checkId },
     } = await octokit.checks.create({
@@ -48,13 +49,28 @@ async function run(): Promise<void> {
       name: CHECK_NAME,
     });
 
-    core.debug("Fetching changed files.");
+    core.info("Fetching changed files.");
 
     const changedFiles = await getChangedFiles(octokit, inputs.files, prNumber, getSha());
-    core.debug(`${changedFiles.length} files match ${inputs.files}.`);
-    
-    const success = (changedFiles.length == 0);
-    
+    core.info(`${changedFiles.length} files match ${inputs.files}.`);
+
+    const WORKSPACE_DIR = process.env["GITHUB_WORKSPACE"] + '/';
+
+    let oldChangedFiles: string[] = [];
+
+    for (let i in changedFiles) {
+      const changedFile = changedFiles[i].slice(WORKSPACE_DIR.length)
+      const commits = await commitsForFile(changedFile);
+      if (commits.length > 1) {
+        core.info(` * ${changedFile} = ${commits.length} commits`);
+        oldChangedFiles.push(changedFiles[i])
+      } else {
+        core.info(` * ${changedFile} new file`);
+      }
+    }
+
+    const success = (oldChangedFiles.length == 0);
+
     await octokit.checks.update({
       owner: OWNER,
       repo: REPO,
@@ -64,8 +80,8 @@ async function run(): Promise<void> {
       conclusion: (success ? "success" : "failure"),
       output: {
         title: "Immutable Files Check",
-        summary: "Ensure no files in " + JSON.stringify(inputs.files) + " have been changed",
-        annotations: files2annotations(changedFiles),
+        summary: "Ensure no files in " + JSON.stringify(inputs.files) + " have been changed after committed",
+        annotations: files2annotations(oldChangedFiles),
       },
     });
   } catch (err) {
